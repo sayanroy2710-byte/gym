@@ -1,0 +1,336 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#111714">
+  <meta name="description" content="Home and gym workout planner with BMI, diet survey, body type guidance, and workout calendar.">
+  <title>FitForge</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="#home" data-go="home" aria-label="FitForge home">
+        <img src="assets/icon.svg" alt="" class="brand-mark">
+        <span>
+          <strong>FitForge</strong>
+          <small>Train. Eat. Repeat.</small>
+        </span>
+      </a>
+      <button class="icon-button" id="installButton" type="button" hidden>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v10m0 0 4-4m-4 4-4-4M5 15v4h14v-4" /></svg>
+        <span>Install</span>
+      </button>
+    </header>
+
+    <nav class="bottom-nav" aria-label="Primary">
+      <button class="is-active" type="button" data-view="home">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11 12 4l8 7v8H5v-6h6v6" /></svg>
+        <span>Home</span>
+      </button>
+      <button type="button" data-view="workouts">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h10M5 12h14M7 17h10M3 9v6m18-6v6" /></svg>
+        <span>Workouts</span>
+      </button>
+      <button type="button" data-view="bmi">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19c1.8-5.8 14.2-5.8 16 0M12 4a4 4 0 1 1 0 8 4 4 0 0 1 0-8Z" /></svg>
+        <span>BMI</span>
+      </button>
+      <button type="button" data-view="calendar">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3v4m10-4v4M4 8h16v12H4zM8 12h3m3 0h3M8 16h3m3 0h3" /></svg>
+        <span>Calendar</span>
+      </button>
+    </nav>
+
+    <main>
+      <section class="view is-active" id="homeView" data-view-panel="home" aria-labelledby="homeTitle">
+        <div class="hero-panel">
+          <div class="hero-copy">
+            <p class="eyebrow">Today</p>
+            <h1 id="homeTitle">Build a stronger week.</h1>
+            <p id="todaySummary">Set your profile to generate workouts, diet targets, and a calendar that adapts to your goal.</p>
+            <div class="button-row">
+              <button class="primary-action" type="button" data-go="workouts">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h10M5 12h14M7 17h10M3 9v6m18-6v6" /></svg>
+                <span>Start</span>
+              </button>
+              <button class="secondary-action" type="button" data-go="bmi">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19c1.8-5.8 14.2-5.8 16 0M12 4a4 4 0 1 1 0 8 4 4 0 0 1 0-8Z" /></svg>
+                <span>Profile</span>
+              </button>
+            </div>
+          </div>
+          <img class="body-visual" src="assets/muscle-map.svg" alt="Muscle group training visual">
+        </div>
+
+        <section class="metric-strip" aria-label="Current fitness snapshot">
+          <article class="metric-card">
+            <span>BMI</span>
+            <strong id="homeBmi">--</strong>
+            <small id="homeBmiLabel">Not calculated</small>
+          </article>
+          <article class="metric-card">
+            <span>Body type</span>
+            <strong id="homeBodyType">--</strong>
+            <small id="homeBodyCue">Survey pending</small>
+          </article>
+          <article class="metric-card">
+            <span>Plan</span>
+            <strong id="homePlan">Balanced</strong>
+            <small id="homeCalories">Set profile</small>
+          </article>
+        </section>
+
+        <section class="section-block">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Focus</p>
+              <h2>Muscle groups</h2>
+            </div>
+            <button class="text-button" type="button" data-go="workouts">All workouts</button>
+          </div>
+          <div class="muscle-tile-grid" id="homeMuscleTiles"></div>
+        </section>
+
+        <section class="section-block">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Calendar</p>
+              <h2 id="todayWorkoutTitle">Today&apos;s workout</h2>
+            </div>
+            <button class="text-button" type="button" data-go="calendar">Week</button>
+          </div>
+          <div id="todayWorkout" class="today-workout"></div>
+        </section>
+      </section>
+
+      <section class="view" id="workoutsView" data-view-panel="workouts" aria-labelledby="workoutsTitle">
+        <div class="section-heading sticky-heading">
+          <div>
+            <p class="eyebrow">Workout Library</p>
+            <h2 id="workoutsTitle">Train by muscle</h2>
+          </div>
+          <div class="segmented" role="group" aria-label="Training location">
+            <button type="button" class="is-selected" data-location="home">Home</button>
+            <button type="button" data-location="gym">Gym</button>
+          </div>
+        </div>
+
+        <div class="chip-row" id="muscleFilters" aria-label="Muscle group filters"></div>
+        <div class="workout-list" id="workoutList"></div>
+        <div class="exercise-modal" id="exerciseModal" hidden>
+          <section class="exercise-sheet" role="dialog" aria-modal="true" aria-labelledby="exerciseModalTitle">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow" id="exerciseModalPlace">Animation</p>
+                <h2 id="exerciseModalTitle">Exercise</h2>
+              </div>
+              <button class="icon-only" type="button" data-close-exercise aria-label="Close animation">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg>
+              </button>
+            </div>
+            <div id="exerciseModalBody"></div>
+          </section>
+        </div>
+      </section>
+
+      <section class="view" id="bmiView" data-view-panel="bmi" aria-labelledby="bmiTitle">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Profile</p>
+            <h2 id="bmiTitle">BMI, body type, diet</h2>
+          </div>
+          <button class="text-button" type="button" id="resetProfile">Reset</button>
+        </div>
+
+        <form class="profile-form" id="profileForm">
+          <fieldset>
+            <legend>Body profile</legend>
+            <div class="form-grid">
+              <label class="field">Gender
+                <select id="gender" name="gender">
+                  <option value="male">Male</option>
+                  <option value="female">Female</option>
+                </select>
+              </label>
+              <label class="field">Age
+                <input id="age" name="age" type="number" min="13" max="90" value="25">
+              </label>
+              <label class="field">Height (cm)
+                <input id="height" name="height" type="number" min="120" max="230" value="175">
+              </label>
+              <label class="field">Weight (kg)
+                <input id="weight" name="weight" type="number" min="30" max="250" value="70">
+              </label>
+              <label class="field">Goal
+                <select id="goal" name="goal">
+                  <option value="fat-loss">Fat loss</option>
+                  <option value="maintain">Maintain</option>
+                  <option value="muscle-gain">Muscle gain</option>
+                </select>
+              </label>
+              <label class="field">Activity
+                <select id="activity" name="activity">
+                  <option value="light">Light</option>
+                  <option value="moderate" selected>Moderate</option>
+                  <option value="high">High</option>
+                </select>
+              </label>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>Body type survey</legend>
+            <div class="form-grid">
+              <label class="field">Natural frame
+                <select id="frame" name="frame">
+                  <option value="narrow">Narrow</option>
+                  <option value="medium" selected>Medium</option>
+                  <option value="broad">Broad</option>
+                </select>
+              </label>
+              <label class="field">Weight change
+                <select id="gainPattern" name="gainPattern">
+                  <option value="hard">Hard to gain</option>
+                  <option value="steady" selected>Steady</option>
+                  <option value="easy">Easy to gain</option>
+                </select>
+              </label>
+              <label class="field">Current build
+                <select id="build" name="build">
+                  <option value="lean">Lean</option>
+                  <option value="athletic" selected>Athletic</option>
+                  <option value="soft">Soft</option>
+                </select>
+              </label>
+              <label class="field">Training level
+                <select id="trainingLevel" name="trainingLevel">
+                  <option value="beginner" selected>Beginner</option>
+                  <option value="intermediate">Intermediate</option>
+                  <option value="advanced">Advanced</option>
+                </select>
+              </label>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>Food habit survey</legend>
+            <div class="form-grid">
+              <label class="field">Food style
+                <select id="dietStyle" name="dietStyle">
+                  <option value="nonveg">Non-vegetarian</option>
+                  <option value="eggetarian">Eggetarian</option>
+                  <option value="vegetarian" selected>Vegetarian</option>
+                  <option value="vegan">Vegan</option>
+                </select>
+              </label>
+              <label class="field">Meals per day
+                <select id="meals" name="meals">
+                  <option value="3">3 meals</option>
+                  <option value="4" selected>4 meals</option>
+                  <option value="5">5 meals</option>
+                </select>
+              </label>
+              <label class="field">Protein habit
+                <select id="proteinHabit" name="proteinHabit">
+                  <option value="low">Rarely</option>
+                  <option value="moderate" selected>Most meals</option>
+                  <option value="high">Every meal</option>
+                </select>
+              </label>
+              <label class="field">Vegetables
+                <select id="vegetables" name="vegetables">
+                  <option value="low">Less than 1 serving</option>
+                  <option value="moderate" selected>2 to 3 servings</option>
+                  <option value="high">4+ servings</option>
+                </select>
+              </label>
+              <label class="field">Sweet drinks
+                <select id="sweetDrinks" name="sweetDrinks">
+                  <option value="daily">Daily</option>
+                  <option value="weekly" selected>Weekly</option>
+                  <option value="rare">Rarely</option>
+                </select>
+              </label>
+              <label class="field">Cooking time
+                <select id="cooking" name="cooking">
+                  <option value="quick" selected>Quick prep</option>
+                  <option value="standard">Standard</option>
+                  <option value="batch">Batch cooking</option>
+                </select>
+              </label>
+              <label class="field">Avoid
+                <select id="avoid" name="avoid">
+                  <option value="none" selected>No restriction</option>
+                  <option value="dairy">Dairy</option>
+                  <option value="gluten">Gluten</option>
+                  <option value="nuts">Nuts</option>
+                </select>
+              </label>
+              <label class="field">Workout place
+                <select id="preferredLocation" name="preferredLocation">
+                  <option value="home" selected>Home</option>
+                  <option value="gym">Gym</option>
+                </select>
+              </label>
+            </div>
+          </fieldset>
+
+          <button class="primary-action wide" type="submit">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 13 4 4L19 7" /></svg>
+            <span>Generate Plan</span>
+          </button>
+        </form>
+
+        <div class="result-grid">
+          <section class="result-panel" id="bmiResult" aria-live="polite"></section>
+          <section class="result-panel" id="dietPlan" aria-live="polite"></section>
+        </div>
+
+        <p class="health-note">BMI is a screening measure, not a diagnosis. Use the diet and workout plan as general guidance and speak with a qualified professional for medical conditions, pregnancy, eating disorders, or injury rehab.</p>
+      </section>
+
+      <section class="view" id="calendarView" data-view-panel="calendar" aria-labelledby="calendarTitle">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Schedule</p>
+            <h2 id="calendarTitle">Workout calendar</h2>
+          </div>
+          <button class="text-button" type="button" id="generateWeek">Build week</button>
+        </div>
+
+        <div class="calendar-tools">
+          <label class="field">Day
+            <select id="daySelect"></select>
+          </label>
+          <label class="field">Muscle
+            <select id="calendarMuscle"></select>
+          </label>
+          <label class="field">Place
+            <select id="calendarLocation">
+              <option value="home">Home</option>
+              <option value="gym">Gym</option>
+            </select>
+          </label>
+          <button class="secondary-action" id="saveCalendarDay" type="button">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M12 5v14" /></svg>
+            <span>Save</span>
+          </button>
+        </div>
+
+        <div class="calendar-summary" id="calendarSummary"></div>
+        <div class="calendar-grid" id="calendarGrid"></div>
+        <button class="ghost-action wide" type="button" id="clearCompletions">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V5h6v2m-8 3 1 9h8l1-9" /></svg>
+          <span>Clear completed marks</span>
+        </button>
+      </section>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
